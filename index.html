@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tonika — Yerleştir, karıştır, patlat</title>
+  <meta name="description" content="Tonika, iPhone ve iPad için bir blok bulmacası. Blokları yerleştir, renkleri karıştır, dolu satırları patlat.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #faf3e8;
+      --ink: #453b3d;
+      --quiet: rgba(69, 59, 61, 0.68);
+      --card: #fffdfb;
+      --line: #e8ddd4;
+      --well: #e8ddd4;
+      --accent: #f27866;
+      --accent-deep: #cc574d;
+      --blue: #599cf0;
+      --blue-deep: #3d78c4;
+      --gold: #f9bf42;
+      --shadow: 0 18px 40px rgba(69, 59, 61, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(900px 420px at 85% -10%, rgba(242, 120, 102, 0.18), transparent 60%),
+        radial-gradient(700px 380px at -10% 20%, rgba(89, 156, 240, 0.14), transparent 55%),
+        var(--paper);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    a { color: inherit; }
+    img { max-width: 100%; display: block; }
+    .wrap { width: min(1080px, calc(100% - 40px)); margin: 0 auto; }
+    .tr, .en { display: none; }
+    html[lang="tr"] .tr { display: revert; }
+    html[lang="en"] .en { display: revert; }
+    html[lang="tr"] span.tr, html[lang="en"] span.en { display: inline; }
+
+    header.top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 0 8px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-size: 1.15rem;
+    }
+    nav { display: flex; align-items: center; gap: 18px; }
+    nav a {
+      text-decoration: none;
+      color: var(--quiet);
+      font-weight: 650;
+      font-size: 0.95rem;
+    }
+    nav a:hover { color: var(--ink); }
+    .langs { display: flex; gap: 4px; }
+    .langs button {
+      border: 0;
+      background: transparent;
+      color: var(--quiet);
+      font: inherit;
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 6px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    .langs button[aria-pressed="true"] {
+      background: var(--card);
+      color: var(--ink);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 28px;
+      align-items: center;
+      padding: 28px 0 12px;
+    }
+    .kicker {
+      margin: 0 0 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.78rem;
+      color: var(--accent-deep);
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2.6rem, 6vw, 4.4rem);
+      line-height: 0.95;
+      letter-spacing: -0.045em;
+    }
+    .tagline {
+      margin: 14px 0 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--quiet);
+    }
+    .lead {
+      margin: 14px 0 0;
+      max-width: 38rem;
+      font-size: 1.05rem;
+      color: var(--quiet);
+    }
+    .cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 26px; }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      font-weight: 800;
+      border-radius: 18px;
+      padding: 15px 20px;
+      box-shadow: 0 6px 0 var(--accent-deep);
+    }
+    a.cta:hover { transform: translateY(-1px); }
+    a.cta:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--accent-deep); }
+    .ghost {
+      color: var(--quiet);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .phone {
+      justify-self: center;
+    }
+    .phone img {
+      width: min(340px, 78vw);
+      height: auto;
+      filter: drop-shadow(0 24px 36px rgba(69, 59, 61, 0.16));
+    }
+
+    .mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 2px;
+      transform: rotate(-8deg);
+    }
+    .mark i, .swatch {
+      display: block;
+      border-radius: 3px;
+    }
+    .r { background: #f27073; }
+    .y { background: #fcc94a; }
+    .b { background: #599cf0; }
+    .g { background: #61c77d; }
+    .o { background: #fc964a; }
+    .v { background: #a67deb; }
+
+    section { padding: 54px 0; }
+    h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.7rem, 3vw, 2.2rem);
+      letter-spacing: -0.03em;
+    }
+    .sub { margin: 0 0 22px; color: var(--quiet); max-width: 36rem; }
+
+    .steps, .features {
+      display: grid;
+      gap: 14px;
+    }
+    .steps { grid-template-columns: repeat(3, 1fr); }
+    .features { grid-template-columns: repeat(3, 1fr); }
+    article.card, .mix {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+    article.card { padding: 20px 20px 22px; }
+    .n {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      background: #fff1ee;
+      color: var(--accent-deep);
+      margin-bottom: 12px;
+    }
+    article.card h3 { margin: 0 0 6px; font-size: 1.05rem; }
+    article.card p { margin: 0; color: var(--quiet); }
+
+    .mix {
+      margin-top: 14px;
+      padding: 18px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px 28px;
+      align-items: center;
+    }
+    .recipe { display: flex; align-items: center; gap: 8px; font-weight: 800; }
+    .swatch { width: 22px; height: 22px; border-radius: 6px; box-shadow: inset 0 -3px 0 rgba(69, 59, 61, 0.12); }
+    .op { color: var(--quiet); font-weight: 700; }
+
+    .gallery {
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 8px 2px 18px;
+    }
+    .gallery figure {
+      margin: 0;
+      flex: 0 0 auto;
+      scroll-snap-align: start;
+    }
+    .gallery img {
+      height: 460px;
+      width: auto;
+      border-radius: 28px;
+    }
+    .gallery figcaption {
+      margin-top: 8px;
+      text-align: center;
+      color: var(--quiet);
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+
+    footer {
+      padding: 10px 0 40px;
+      color: var(--quiet);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 0.92rem;
+    }
+    footer a { color: #b94b3d; font-weight: 700; }
+
+    @media (max-width: 860px) {
+      .hero, .steps, .features { grid-template-columns: 1fr; }
+      nav .hide-sm { display: none; }
+      .gallery img { height: 420px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="index.html">
+        <span class="mark" aria-hidden="true">
+          <i class="r"></i><i class="y"></i><i></i>
+          <i class="b"></i><i class="g"></i><i class="o"></i>
+          <i></i><i class="v"></i><i class="b"></i>
+        </span>
+        Tonika
+      </a>
+      <nav>
+        <a class="hide-sm" href="#oyna"><span class="tr">Nasıl oynanır</span><span class="en">How to play</span></a>
+        <a class="hide-sm" href="#ozellik"><span class="tr">Özellikler</span><span class="en">Features</span></a>
+        <a href="gizlilik.html"><span class="tr">Gizlilik</span><span class="en">Privacy</span></a>
+        <div class="langs" role="group" aria-label="Language">
+          <button type="button" id="lang-tr" aria-pressed="true">TR</button>
+          <button type="button" id="lang-en" aria-pressed="false">EN</button>
+        </div>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div>
+        <p class="kicker"><span class="tr">iPhone ve iPad için blok bulmaca</span><span class="en">A block puzzle for iPhone and iPad</span></p>
+        <h1>Tonika</h1>
+        <p class="tagline"><span class="tr">Yerleştir · Karıştır · Patlat</span><span class="en">Place · Mix · Clear</span></p>
+        <p class="lead">
+          <span class="tr">Blokları tahtaya bırak. Satır dolunca patlar. Renkleri üst üste getirince yeni renkler çıkar. Altmış seviye, sonra da bitmeyen bir tahta.</span>
+          <span class="en">Drop blocks onto the board. A full line clears. Stack two colors and a new one appears. Sixty levels, then a board that does not end.</span>
+        </p>
+        <div class="cta-row">
+          <p class="cta" id="store"><span class="tr">App Store’da yakında</span><span class="en">Coming to the App Store</span></p>
+          <a class="ghost" href="#oyna"><span class="tr">Nasıl oynanır</span><span class="en">How to play</span></a>
+        </div>
+      </div>
+      <div class="phone">
+        <img src="img/telefon.jpg" alt="Tonika ana sayfası, iPhone ekranında">
+      </div>
+    </section>
+
+    <section id="oyna">
+      <h2><span class="tr">Nasıl oynanır</span><span class="en">How to play</span></h2>
+      <p class="sub"><span class="tr">Kurallar kısa. Zorlaşan kısım tahtayı doldurmadan hedefi tutmak.</span><span class="en">The rules are short. The hard part is hitting the goal before the board fills up.</span></p>
+      <div class="steps">
+        <article class="card">
+          <div class="n">1</div>
+          <h3><span class="tr">Yerleştir</span><span class="en">Place</span></h3>
+          <p><span class="tr">Alttaki blokları sürükleyip tahtaya bırak.</span><span class="en">Drag the pieces along the bottom onto the board.</span></p>
+        </article>
+        <article class="card">
+          <div class="n">2</div>
+          <h3><span class="tr">Patlat</span><span class="en">Clear</span></h3>
+          <p><span class="tr">Dolu satır ve sütunlar patlar, puan kazandırır. Arka arkaya patlatırsan kombo çarpanı büyür.</span><span class="en">Full rows and columns clear and score. Clear again right away and the combo multiplier climbs.</span></p>
+        </article>
+        <article class="card">
+          <div class="n">3</div>
+          <h3><span class="tr">Karıştır</span><span class="en">Mix</span></h3>
+          <p><span class="tr">Bir bloğu diğerinin üstüne bırak. Kırmızı, sarı ve maviden yeni renkler çıkar. Tek renkten oluşan bir satır saf renk bonusu verir.</span><span class="en">Drop one block onto another. Red, yellow, and blue make new colors. A line of a single color pays a pure-color bonus.</span></p>
+        </article>
+      </div>
+      <div class="mix" aria-label="Renk karışımları">
+        <div class="recipe"><i class="swatch r"></i><span class="op">+</span><i class="swatch y"></i><span class="op">=</span><i class="swatch o"></i></div>
+        <div class="recipe"><i class="swatch y"></i><span class="op">+</span><i class="swatch b"></i><span class="op">=</span><i class="swatch g"></i></div>
+        <div class="recipe"><i class="swatch r"></i><span class="op">+</span><i class="swatch b"></i><span class="op">=</span><i class="swatch v"></i></div>
+      </div>
+    </section>
+
+    <section id="ozellik">
+      <h2><span class="tr">Oyunda ne var</span><span class="en">What’s inside</span></h2>
+      <p class="sub"><span class="tr">Üç bölüm. Her seviyede üç yıldıza kadar.</span><span class="en">Three chapters. Up to three stars on every level.</span></p>
+      <div class="features">
+        <article class="card">
+          <h3><span class="tr">60 seviye</span><span class="en">60 levels</span></h3>
+          <p><span class="tr">İlk Bloklar, Renk Karışımı ve Usta Eller. Yerleştirmekle başlar, büyük kombolarla biter.</span><span class="en">First Blocks, Color Mixing, and Skilled Hands. It starts with placing pieces and ends with big combos.</span></p>
+        </article>
+        <article class="card">
+          <h3><span class="tr">Üç yıldız</span><span class="en">Three stars</span></h3>
+          <p><span class="tr">Geri almadan ve hedef hamle sayısında bitirirsen üç yıldız gelir.</span><span class="en">Finish within the move goal, without undoing, and you earn three stars.</span></p>
+        </article>
+        <article class="card">
+          <h3><span class="tr">Sonsuz mod</span><span class="en">Endless mode</span></h3>
+          <p><span class="tr">Seviyeler bitince tahta kapanmaz. En yüksek puan cihazında durur.</span><span class="en">When the levels are done, the board stays open. Your best score stays on the device.</span></p>
+        </article>
+        <article class="card">
+          <h3><span class="tr">Hesap yok</span><span class="en">No account</span></h3>
+          <p><span class="tr">Giriş yok. İlerleme, yıldızlar ve ayarlar yalnızca cihazda kalır.</span><span class="en">No sign-in. Progress, stars, and settings stay on the device.</span></p>
+        </article>
+        <article class="card">
+          <h3><span class="tr">Kısa oturumlar</span><span class="en">Short sessions</span></h3>
+          <p><span class="tr">Bir seviye kısa sürer. Yarım kalan tahta kaldığın yerden açılır.</span><span class="en">A level is a short sitting. An unfinished board opens where you left it.</span></p>
+        </article>
+        <article class="card">
+          <h3><span class="tr">iPhone ve iPad</span><span class="en">iPhone and iPad</span></h3>
+          <p><span class="tr">Dikey oynanır. Müzik, ses ve titreşim ayarlardan kapanır.</span><span class="en">Played in portrait. Music, sound, and haptics can be turned off in Settings.</span></p>
+        </article>
+      </div>
+    </section>
+
+    <section id="gorunum">
+      <h2><span class="tr">Ekrandan</span><span class="en">On screen</span></h2>
+      <p class="sub"><span class="tr">Ana sayfa, bir patlama, kombo ve seviye haritası.</span><span class="en">Home, a clear, a combo, and the level map.</span></p>
+      <div class="gallery">
+        <figure>
+          <img src="img/yerlestir.jpg" alt="Tonika ana menüsü">
+          <figcaption><span class="tr">Ana sayfa</span><span class="en">Home</span></figcaption>
+        </figure>
+        <figure>
+          <img src="img/patlat.jpg" alt="Dolu satır patladıktan sonra tahta">
+          <figcaption><span class="tr">Satır patlar</span><span class="en">A line clears</span></figcaption>
+        </figure>
+        <figure>
+          <img src="img/kombo.jpg" alt="Kombo çarpanı olan bir tahta">
+          <figcaption><span class="tr">Kombo</span><span class="en">Combo</span></figcaption>
+        </figure>
+        <figure>
+          <img src="img/seviyeler.jpg" alt="Altmış seviyelik harita">
+          <figcaption><span class="tr">60 seviye</span><span class="en">60 levels</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <footer>
+      <span><span class="tr">Tonika · Sercan · Ücretsiz, reklam içerir</span><span class="en">Tonika · Sercan · Free, with ads</span></span>
+      <a href="gizlilik.html"><span class="tr">Gizlilik politikası</span><span class="en">Privacy policy</span></a>
+    </footer>
+  </div>
+  <script>
+    // App Store sayfası açılınca bağlantıyı buraya yapıştır.
+    const STORE_URL = "";
+
+    const root = document.documentElement;
+    const tr = document.getElementById("lang-tr");
+    const en = document.getElementById("lang-en");
+
+    function setLang(lang) {
+      root.lang = lang;
+      tr.setAttribute("aria-pressed", lang === "tr" ? "true" : "false");
+      en.setAttribute("aria-pressed", lang === "en" ? "true" : "false");
+      try { localStorage.setItem("tonika-lang", lang); } catch (e) {}
+    }
+
+    tr.addEventListener("click", function () { setLang("tr"); });
+    en.addEventListener("click", function () { setLang("en"); });
+
+    try {
+      const saved = localStorage.getItem("tonika-lang");
+      if (saved === "en" || saved === "tr") setLang(saved);
+    } catch (e) {}
+
+    if (STORE_URL) {
+      const slot = document.getElementById("store");
+      const link = document.createElement("a");
+      link.className = "cta";
+      link.id = "store";
+      link.href = STORE_URL;
+      link.innerHTML = '<span class="tr">App Store’da aç</span><span class="en">View on the App Store</span>';
+      slot.replaceWith(link);
+    }
+  </script>
+</body>
+</html>
